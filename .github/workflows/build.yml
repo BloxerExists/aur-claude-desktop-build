@@ -25,12 +25,6 @@ jobs:
           mkdir -p /home/builder/.cache /home/builder/.config
           chown -R builder:builder /home/builder
 
-      - name: Install yay
-        run: |
-          su builder -c "git clone https://aur.archlinux.org/yay-bin.git /home/builder/yay-bin"
-          cd /home/builder/yay-bin
-          su builder -c "makepkg -si --noconfirm"
-
       - name: Get latest AUR version
         id: aur
         run: |
@@ -52,10 +46,11 @@ jobs:
           else
             echo "build=false" >> $GITHUB_ENV
 
-      - name: Build claude-desktop via yay
+      - name: Build claude-desktop
         if: env.build == 'true'
         run: |
-          su builder -c "yay -S claude-desktop"
+          su builder -c "git clone https://aur.archlinux.org/claude-desktop.git /home/builder/claude && cd /home/builder/claude"
+          su builder -c "makepkg -o --noconfirm"
           
       - name: Upload package as release
         if: env.build == 'true'
