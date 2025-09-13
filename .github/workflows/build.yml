@@ -29,7 +29,7 @@ jobs:
         id: aur
         run: |
           AUR_JSON=$(curl -s "https://aur.archlinux.org/rpc/?v=5&type=info&arg=claude-desktop")
-          echo "aur_version=$(echo $AUR_JSON | jq -r '.results.Version')" >> $GITHUB_ENV
+          echo "aur_version=$(echo $AUR_JSON | jq -r '.results[0].Version')" >> $GITHUB_ENV
 
       - name: Get latest GitHub release version
         id: gh
@@ -56,7 +56,7 @@ jobs:
         if: env.build == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          files: /home/builder/claude-desktop/*.pkg.tar.zst
+          files: /home/builder/claude/*.pkg.tar.zst
           tag_name: ${{ env.aur_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
