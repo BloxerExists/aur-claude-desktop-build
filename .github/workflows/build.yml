@@ -41,10 +41,13 @@ jobs:
       - name: Compare versions
         id: compare
         run: |
+          gh_version="${{ env.gh_version }}"
+          aur_version="${{ env.aur_version }}"
           if [ -z "$gh_version" ] || [ "$aur_version" != "$gh_version" ]; then
             echo "build=true" >> $GITHUB_ENV
           else
             echo "build=false" >> $GITHUB_ENV
+          fi
 
       - name: Build claude-desktop
         if: env.build == 'true'
