@@ -52,7 +52,9 @@ jobs:
       - name: Build claude-desktop
         if: env.build == 'true'
         run: |
-          su builder -c "git clone https://aur.archlinux.org/claude-desktop.git /home/builder/claude && cd /home/builder/claude"
+          su builder -c "git clone https://aur.archlinux.org/claude-desktop.git /home/builder/claude"
+          cd /home/builder/claude
+          chown -R builder:builder /home/builder/claude
           su builder -c "makepkg -o --noconfirm"
           
       - name: Upload package as release
