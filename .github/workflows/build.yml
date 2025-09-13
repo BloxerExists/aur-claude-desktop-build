@@ -1,0 +1,58 @@
+name: Build claude-desktop if AUR version is newer
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo pacman-key --init
+          sudo pacman-key --populate archlinux
+          sudo pacman -Syu --noconfirm base-devel git jq
+
+      - name: Get latest AUR version
+        id: aur
+        run: |
+          AUR_JSON=$(curl -s "https://aur.archlinux.org/rpc/?v=5&type=info&arg=claude-desktop")
+          echo "aur_version=$(echo $AUR_JSON | jq -r '.results.Version')" >> $GITHUB_ENV
+
+      - name: Get latest GitHub release version
+        id: gh
+        run: |
+          GH_VERSION=$(curl -s "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/latest" | jq -r '.tag_name')
+          echo "gh_version=$GH_VERSION" >> $GITHUB_ENV
+
+      - name: Compare versions
+        id: compare
+        run: |
+          if [ "$aur_version" = "$gh_version" ]; then
+            echo "AUR version is not newer. Skipping build."
+            echo "build=false" >> $GITHUB_ENV
+          else
+            echo "AUR version is newer. Building..."
+            echo "build=true" >> $GITHUB_ENV
+          fi
+
+      - name: Build package
+        if: env.build == 'true'
+        run: |
+          git clone https://aur.archlinux.org/claude-desktop.git
+          cd claude-desktop
+          makepkg -sci --noconfirm
+
+      - name: Create release if built
+        if: env.build == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: claude-desktop/*.pkg.tar.zst
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
