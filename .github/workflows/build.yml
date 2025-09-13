@@ -54,8 +54,8 @@ jobs:
           su builder -c "git clone https://aur.archlinux.org/electron25.git /home/builder/electron25"
           cd /home/builder/electron25
           chown -R builder:builder /home/builder/electron25 # Not sure if this is neccesseray, but because claude needed it earlier, I am going to add this for security :3
-          pkg_file=$(su builder -c "cd /home/builder/electron25 && makepkg -o --noconfirm && makepkg --packagelist")
-          pacman -U --noconfirm "$pkg_file"
+          su builder -c "makepkg -o --noconfirm"
+          pacman -U --noconfirm "/home/builder/electron25/*.pkg.tar
   
       - name: Build claude-desktop
         if: env.build == 'true'
@@ -63,13 +63,13 @@ jobs:
           su builder -c "git clone https://aur.archlinux.org/claude-desktop.git /home/builder/claude"
           cd /home/builder/claude
           chown -R builder:builder /home/builder/claude
-          echo "claude_desktop_pkg=$(su builder -c 'makepkg -o --noconfirm --packagelist')" >> $GITHUB_ENV
+          su builder -c "makepkg -o --noconfirm"
 
       - name: Upload package as release
         if: env.build == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          files: ${{ env.claude_desktop_bin }}
+          files: /home/builder/claude/*.pkg.tar
           tag_name: ${{ env.aur_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
