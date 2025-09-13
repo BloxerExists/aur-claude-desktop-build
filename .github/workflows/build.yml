@@ -55,7 +55,8 @@ jobs:
           cd /home/builder/electron25
           chown -R builder:builder /home/builder/electron25 # Not sure if this is neccesseray, but because claude needed it earlier, I am going to add this for security :3
           su builder -c "makepkg -o --noconfirm"
-          pacman -U --noconfirm /home/builder/electron25/*.pkg.tar
+          pkg=$(su builder -c 'cd /home/builder/electron25 && makepkg --packagelist | head -n1')
+          pacman -U --noconfirm "$pkg"
   
       - name: Build claude-desktop
         if: env.build == 'true'
@@ -64,12 +65,13 @@ jobs:
           cd /home/builder/claude
           chown -R builder:builder /home/builder/claude
           su builder -c "makepkg -o --noconfirm"
+          done=$(su builder -c 'cd /home/builder/claude && makepkg --packagelist | head -n1')
 
       - name: Upload package as release
         if: env.build == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          files: /home/builder/claude/*.pkg.tar
+          files: $done
           tag_name: ${{ env.aur_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
