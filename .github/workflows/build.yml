@@ -53,7 +53,7 @@ jobs:
           su builder -c "git clone https://aur.archlinux.org/electron25.git /home/builder/electron25"
           cd /home/builder/electron25
           chown -R builder:builder /home/builder/electron25 # Not sure if this is neccesseray, but because claude needed it earlier, I am going to add this for security :3
-          pkg_file=$(su builder -c "makepkg -o --noconfirm --packagelist")
+          pkg_file=$(su builder -c "cd /home/builder/electron25 && makepkg -o --noconfirm && makepkg --packagelist")
           pacman -U --noconfirm "$pkg_file"
   
       - name: Build claude-desktop
