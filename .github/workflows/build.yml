@@ -1,4 +1,4 @@
-name: Build claude-desktop if AUR version is newer
+name: build-update
 
 on:
   schedule:
@@ -15,18 +15,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup non-root user
+      - name: Setup non-root builder
         run: |
           useradd -m builder
-          passwd -d builder
-          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/builder
+          chmod 440 /etc/sudoers.d/builder
+          mkdir -p /home/builder/.cache /home/builder/.config
+          chown -R builder:builder /home/builder
 
-      - name: Install dependencies
+      - name: Install base dependencies
         run: |
           pacman -Sy --noconfirm git base-devel jq
-          git clone https://aur.archlinux.org/yay.git /home/builder/yay
-          chown -R builder:builder /home/builder/yay
+
+      - name: Install yay and AUR deps
+        run: |
+          sudo -u builder git clone https://aur.archlinux.org/yay.git /home/builder/yay
           sudo -u builder makepkg -si --noconfirm -C /home/builder/yay
+          sudo -u builder yay -S --noconfirm electron25
 
       - name: Get latest AUR version
         id: aur
@@ -44,23 +49,20 @@ jobs:
         id: compare
         run: |
           if [ "$aur_version" = "$gh_version" ]; then
-            echo "AUR version is not newer. Skipping build."
             echo "build=false" >> $GITHUB_ENV
           else
-            echo "AUR version is newer. Building..."
             echo "build=true" >> $GITHUB_ENV
 
-      - name: Build package
+      - name: Build claude-desktop
         if: env.build == 'true'
         run: |
-          git clone https://aur.archlinux.org/claude-desktop.git /home/builder/claude-desktop
-          chown -R builder:builder /home/builder/claude-desktop
+          sudo -u builder git clone https://aur.archlinux.org/claude-desktop.git /home/builder/claude-desktop
           sudo -u builder makepkg -sci --noconfirm -C /home/builder/claude-desktop
 
-      - name: Upload package as release asset
+      - name: Upload package as release
         if: env.build == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          files: claude-desktop/*.pkg.tar.zst
+          files: /home/builder/claude-desktop/*.pkg.tar.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
