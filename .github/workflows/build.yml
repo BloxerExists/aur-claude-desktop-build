@@ -1,4 +1,6 @@
 name: build-update
+permissions:
+  contents: write
 
 on:
   schedule:
@@ -66,12 +68,13 @@ jobs:
           chown -R builder:builder /home/builder/claude
           su builder -c "makepkg -s --noconfirm"
           done=$(su builder -c 'cd /home/builder/claude && makepkg --packagelist | head -n1')
+          echo "claude_pkg=$done" >> $GITHUB_ENV
 
       - name: Upload package as release
         if: env.build == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          files: $done
+          files: ${{ env.claude_pkg }}
           tag_name: ${{ env.aur_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
