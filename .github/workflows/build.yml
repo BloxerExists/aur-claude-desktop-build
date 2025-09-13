@@ -1,4 +1,4 @@
-name: Build claude-desktop if AUR version is newer
+name: build-update
 
 on:
   schedule:
