@@ -54,6 +54,7 @@ jobs:
           su builder -c "git clone https://aur.archlinux.org/electron25.git /home/builder/electron25"
           cd /home/builder/electron25
           chown -R builder:builder /home/builder/electron25 # Not sure if this is neccesseray, but because claude needed it earlier, I am going to add this for security :3
+          export ELECTRON_SKIP_CHROMIUM_BUILD=1 # Important. We nu want to fill space of githubs workflow runner ;W;
           sed -i '/nodejs-lts-hydrogen/d' PKGBUILD
           su builder -c "makepkg -o --noconfirm"
           pacman -U --noconfirm "/home/builder/electron25/*.pkg.tar
