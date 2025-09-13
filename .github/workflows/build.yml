@@ -19,12 +19,17 @@ jobs:
         run: |
           pacman -Sy --noconfirm --needed git base-devel jq curl
 
+      - name: Create non-root user
+        run: |
+          useradd -m builder
+          mkdir -p /home/builder/.cache /home/builder/.config
+          chown -R builder:builder /home/builder
+
       - name: Install yay
         run: |
-          pacman -Sy --noconfirm --needed git base-devel
           git clone https://aur.archlinux.org/yay-bin.git
           cd yay-bin
-          makepkg -si --noconfirm
+          su builder -c makepkg -si --noconfirm
 
       - name: Get latest AUR version
         id: aur
@@ -50,7 +55,7 @@ jobs:
       - name: Build claude-desktop via yay
         if: env.build == 'true'
         run: |
-          yay -S claude-desktop
+          su builder -c yay -S claude-desktop
           
       - name: Upload package as release
         if: env.build == 'true'
