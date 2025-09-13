@@ -50,14 +50,11 @@ jobs:
           fi
       - name: Install electron25
         run: |
-          pacman -Sy --needed --noconfirm brotli c-ares dav1d ffmpeg flac fontconfig freetype2 gcc-libs glibc gtk3 harfbuzz icu jsoncpp kde-cli-tools libevent libffi libjpeg libpng libwebp libxml2 libxslt minizip nss opus pipewire qt5-base snappy trash-cli woff2 xdg-utils zlib clang gn gperf harfbuzz-icu http-parser java-runtime-headless libnotify lld llvm ninja patchutils python-httplib2 python-pyparsing python-requests wget yarn
-          su builder -c "git clone https://aur.archlinux.org/electron25.git /home/builder/electron25"
+          pacman -Sy --needed --noconfirm alsa-lib gtk3 nss
+          su builder -c "git clone https://aur.archlinux.org/electron25-bin.git /home/builder/electron25"
           cd /home/builder/electron25
           chown -R builder:builder /home/builder/electron25 # Not sure if this is neccesseray, but because claude needed it earlier, I am going to add this for security :3
-          export ELECTRON_SKIP_CHROMIUM_BUILD=1 # Important. We nu want to fill space of githubs workflow runner ;W;
-          sed -i '/nodejs-lts-hydrogen/d' PKGBUILD
-          su builder -c "makepkg -o --noconfirm"
-          pacman -U --noconfirm "/home/builder/electron25/*.pkg.tar
+          su builder -c "makepkg -si --noconfirm"
   
       - name: Build claude-desktop
         if: env.build == 'true'
