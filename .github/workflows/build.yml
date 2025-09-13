@@ -27,11 +27,10 @@ jobs:
         run: |
           pacman -Sy --noconfirm --needed git base-devel jq curl
 
-      - name: Install yay and AUR deps
+      - name: Install yay
         run: |
           sudo -u builder git clone https://aur.archlinux.org/yay.git /home/builder/yay
           sudo -u builder makepkg -si --noconfirm -C /home/builder/yay
-          sudo -u builder yay -S --noconfirm --needed electron25
 
       - name: Get latest AUR version
         id: aur
@@ -54,13 +53,11 @@ jobs:
           else
             echo "build=false" >> $GITHUB_ENV
 
-      - name: Build claude-desktop
+      - name: Build claude-desktop via yay
         if: env.build == 'true'
         run: |
-          sudo -u builder git clone https://aur.archlinux.org/claude-desktop.git /home/builder/claude-desktop
-          cd /home/builder/claude-desktop
-          sudo -u builder makepkg -sci --noconfirm
-
+          yay -S claude-desktop
+          
       - name: Upload package as release
         if: env.build == 'true'
         uses: softprops/action-gh-release@v1
