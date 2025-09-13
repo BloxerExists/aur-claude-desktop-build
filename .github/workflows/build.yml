@@ -29,7 +29,7 @@ jobs:
         run: |
           git clone https://aur.archlinux.org/yay-bin.git
           cd yay-bin
-          su builder -c makepkg -si
+          su builder -c "makepkg -si --noconfirm"
 
       - name: Get latest AUR version
         id: aur
@@ -55,7 +55,7 @@ jobs:
       - name: Build claude-desktop via yay
         if: env.build == 'true'
         run: |
-          su builder -c yay -S claude-desktop
+          su builder -c "yay -S claude-desktop"
           
       - name: Upload package as release
         if: env.build == 'true'
