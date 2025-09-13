@@ -29,7 +29,7 @@ jobs:
         run: |
           git clone https://aur.archlinux.org/yay-bin.git
           cd yay-bin
-          su builder -c makepkg -si --noconfirm
+          su builder -c makepkg -si
 
       - name: Get latest AUR version
         id: aur
