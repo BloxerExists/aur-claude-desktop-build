@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
 
     steps:
       - name: Checkout repository
@@ -15,9 +17,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo pacman-key --init
-          sudo pacman-key --populate archlinux
-          sudo pacman -Syu --noconfirm base-devel git jq
+          pacman -Sy --noconfirm base-devel git jq npm electron25
 
       - name: Get latest AUR version
         id: aur
@@ -35,10 +35,8 @@ jobs:
         id: compare
         run: |
           if [ "$aur_version" = "$gh_version" ]; then
-            echo "AUR version is not newer. Skipping build."
             echo "build=false" >> $GITHUB_ENV
           else
-            echo "AUR version is newer. Building..."
             echo "build=true" >> $GITHUB_ENV
           fi
 
