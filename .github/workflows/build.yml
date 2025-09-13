@@ -27,7 +27,7 @@ jobs:
 
       - name: Install yay
         run: |
-          git clone https://aur.archlinux.org/yay-bin.git /home/builder/yay-bin
+          su builder -c "git clone https://aur.archlinux.org/yay-bin.git /home/builder/yay-bin"
           cd /home/builder/yay-bin
           su builder -c "makepkg -si --noconfirm"
 
