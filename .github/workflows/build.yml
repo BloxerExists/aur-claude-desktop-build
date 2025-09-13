@@ -17,7 +17,7 @@ jobs:
 
       - name: Install base dependencies
         run: |
-          pacman -Sy --noconfirm --needed git base-devel jq curl
+          pacman -Sy --noconfirm --needed git base-devel jq curl electron25 gendesk npm nvm
 
       - name: Create non-root user
         run: |
